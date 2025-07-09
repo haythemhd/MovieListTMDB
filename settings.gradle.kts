@@ -21,4 +21,10 @@ dependencyResolutionManagement {
 
 rootProject.name = "MovieListTMDB"
 include(":app")
- 
+include(":core")
+include(":domain")
+include(":data")
+include(":feature-home")
+include(":feature-detail")
+include(":common")
+include(":navigation")
