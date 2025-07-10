@@ -1,6 +1,7 @@
 package com.bnp.movietmdb.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.*
@@ -18,17 +19,21 @@ import com.bnp.movietmdb.domain.model.Movie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenUi(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreenUi(
+    onNavigateToMovieDetail: (id: Int) -> Unit, viewModel: HomeViewModel = hiltViewModel()
+) {
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(title = { Text("Popular Movies") })
-        }
-    ) { padding ->
+        }) { padding ->
         MovieListContent(
             uiState = uiState,
             onLoadMore = viewModel::loadMovies,
             onRefresh = viewModel::onPullToRefresh,
+            onMovieClick = { movie ->
+                onNavigateToMovieDetail(movie.id)
+            },
             padding = padding
         )
     }
@@ -40,6 +45,7 @@ private fun MovieListContent(
     uiState: HomeUiState,
     onLoadMore: () -> Unit,
     onRefresh: () -> Unit,
+    onMovieClick: (Movie) -> Unit,
     padding: PaddingValues
 ) {
     when {
@@ -53,6 +59,7 @@ private fun MovieListContent(
                 CircularProgressIndicator()
             }
         }
+
         else -> {
             val state = rememberPullToRefreshState()
 
@@ -72,7 +79,7 @@ private fun MovieListContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(uiState.movies) { movie ->
-                        MovieItem(movie)
+                        MovieItem(movie, onClick = { onMovieClick(movie) })
                     }
 
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -102,18 +109,20 @@ private fun MovieListContent(
 }
 
 @Composable
-fun MovieItem(movie: Movie) {
+fun MovieItem(
+    movie: Movie, onClick: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(100.dp)
             .padding(4.dp)
+            .clickable(onClick = onClick)
     ) {
         Image(
             painter = rememberAsyncImagePainter(movie.posterUrl),
             contentDescription = movie.title,
-            modifier = Modifier
-                .size(120.dp),
+            modifier = Modifier.size(120.dp),
             contentScale = ContentScale.Crop
         )
         Text(
@@ -125,21 +134,28 @@ fun MovieItem(movie: Movie) {
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
 fun HomeScreenUiPreview() {
     val uiState = HomeUiState(
         movies = listOf(
-            Movie(id = 1, title = "Movie 1", posterUrl = "https://image.tmdb.org/t/p/w500/pathToPoster1.jpg"),
-            Movie(id = 2, title = "Movie 2", posterUrl = "https://image.tmdb.org/t/p/w500/pathToPoster2.jpg")
+            Movie(
+                id = 1,
+                title = "Movie 1",
+                posterUrl = "https://image.tmdb.org/t/p/w500/pathToPoster1.jpg"
+            ), Movie(
+                id = 2,
+                title = "Movie 2",
+                posterUrl = "https://image.tmdb.org/t/p/w500/pathToPoster2.jpg"
+            )
         )
     )
     MovieListContent(
         uiState = uiState,
         onLoadMore = {},
         onRefresh = {},
+        onMovieClick = {},
         padding = PaddingValues(8.dp)
     )
 }

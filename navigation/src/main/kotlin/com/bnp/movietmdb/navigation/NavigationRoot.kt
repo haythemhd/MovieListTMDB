@@ -40,7 +40,11 @@ fun NavigationRoot(
                         key = key,
                         metadata = TwoPaneScene.twoPane()
                     ) {
-                        HomeScreenUi()
+                        HomeScreenUi(
+                            onNavigateToMovieDetail = { id ->
+                                backStack.add(DetailScreen(id = id))
+                            }
+                        )
                     }
                 }
 
@@ -49,7 +53,10 @@ fun NavigationRoot(
                         key = key,
                         metadata = TwoPaneScene.twoPane()
                     ) {
-                        DetailScreenUi()
+                        DetailScreenUi(
+                            onBackClick = { backStack.remove(key) },
+                            movieId = key.id
+                        )
                     }
                 }
 

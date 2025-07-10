@@ -1,7 +1,9 @@
 package com.bnp.movietmdb.data.remote
 
+import com.bnp.movietmdb.data.remote.dto.MovieDetailDto
 import com.bnp.movietmdb.data.remote.response.PopularMoviesResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TmdbService {
@@ -11,5 +13,11 @@ interface TmdbService {
         @Query("page") page: Int = 1,
         @Query("api_key") apiKey: String
     ): PopularMoviesResponse
+
+    @GET("movie/{movie_id}")
+    suspend fun getMovieDetail(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): MovieDetailDto
 
 }
