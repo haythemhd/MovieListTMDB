@@ -22,14 +22,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             AppTheme(themeViewModel = themeViewModel) {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavigationRoot(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
-                        themeViewModel = themeViewModel
-                    )
-                }
+                NavigationRoot(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(),
+                    themeViewModel = themeViewModel
+                )
+
             }
         }
     }

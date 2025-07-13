@@ -65,13 +65,10 @@ fun DetailScreenUi(
                                 .padding(horizontal = 12.dp)
                                 .clickable {
                                     onBackClick.invoke()
-                                }
-                        )
+                                })
                     },
-                    title = { Text(text = movie.title) }
-                )
-            }
-        ) { padding ->
+                    title = { Text(text = movie.title) })
+            }) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -185,8 +182,7 @@ fun DetailScreenUi(
                                     // open URL if needed
                                 },
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Black,
-                                    contentColor = Color.Red
+                                    containerColor = Color.Black, contentColor = Color.Red
                                 )
                             ) {
                                 Text(
@@ -194,8 +190,7 @@ fun DetailScreenUi(
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
-                        }
-                        else {
+                        } else {
                             Button(
                                 onClick = {
                                     // open URL if needed
