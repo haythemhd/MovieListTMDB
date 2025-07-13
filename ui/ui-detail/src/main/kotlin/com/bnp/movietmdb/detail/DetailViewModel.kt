@@ -1,13 +1,13 @@
 package com.bnp.movietmdb.detail
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bnp.movietmdb.domain.model.MovieDetail
 import com.bnp.movietmdb.domain.usecase.GetMovieDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -15,23 +15,35 @@ import javax.inject.Inject
 class DetailViewModel @Inject constructor(
     private val getMovieDetailUseCase: GetMovieDetailUseCase
 ) : ViewModel() {
-
-    var uiState by mutableStateOf<MovieDetail?>(null)
-        private set
-
-    var isLoading by mutableStateOf(true)
-        private set
-
+    private val _uiState = MutableStateFlow(DetailUiState())
+    val uiState: StateFlow<DetailUiState> = _uiState
     fun loadMovieDetail(id: Int) {
         viewModelScope.launch {
-            isLoading = true
+            _uiState.update { DetailUiState(isLoading = true) }
             try {
-                uiState = getMovieDetailUseCase(id)
+                val movieDetail = getMovieDetailUseCase(id)
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        movieDetail = movieDetail, isLoading = false, errorMessage = null
+                    )
+                }
             } catch (e: Exception) {
-                // Handle error state
-            } finally {
-                isLoading = false
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isLoading = false, errorMessage = e.message ?: "An error occurred"
+                    )
+                }
             }
         }
     }
+
+    fun resetError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
 }
+
+data class DetailUiState(
+    val movieDetail: MovieDetail? = null,
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+)

@@ -38,7 +38,7 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
     }
@@ -58,9 +58,13 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isRefreshing = false, isLoading = false) }
+                _uiState.update { it.copy(isRefreshing = false, isLoading = false, errorMessage = e.message) }
             }
         }
+    }
+
+    fun resetError() {
+        _uiState.update { it.copy(errorMessage = null) }
     }
 }
 
@@ -69,5 +73,6 @@ data class HomeUiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val currentPage: Int = 1,
-    val canLoadMore: Boolean = true
+    val canLoadMore: Boolean = true,
+    val errorMessage: String? = null
 )

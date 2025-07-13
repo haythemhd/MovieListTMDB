@@ -23,10 +23,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +41,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.bnp.movietmdb.domain.model.MovieDetail
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,167 +55,194 @@ fun DetailScreenUi(
         viewModel.loadMovieDetail(movieId)
     }
 
-    val movie = viewModel.uiState
-    val loading = viewModel.isLoading
+    val uiState by viewModel.uiState.collectAsState()
 
-    if (loading) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = message, actionLabel = "Dismiss", duration = SnackbarDuration.Short
+                )
+                viewModel.resetError()
+            }
         }
-    } else if (movie != null) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp)
-                                .clickable {
-                                    onBackClick.invoke()
-                                })
-                    },
-                    title = { Text(text = movie.title) })
-            }) { padding ->
-            Column(
+    }
+
+    Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
+        TopAppBar(navigationIcon = {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
+                    .padding(horizontal = 12.dp)
+                    .clickable {
+                        onBackClick.invoke()
+                    })
+        }, title = { Text(text = uiState.movieDetail?.title ?: "") })
+    }) { padding ->
+
+        MovieDetailContent(
+            movieDetail = uiState.movieDetail,
+            isLoading = uiState.isLoading,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        )
+    }
+}
+
+@Composable
+fun MovieDetailContent(
+    modifier: Modifier,
+    movieDetail: MovieDetail?,
+    isLoading: Boolean
+) {
+    Column(
+        modifier = modifier
+            .padding(16.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
             ) {
-                movie.posterUrl?.let {
+                CircularProgressIndicator()
+            }
+        } else {
+            movieDetail?.let {
+
+                movieDetail.posterUrl?.let {
                     Image(
                         painter = rememberAsyncImagePainter(it),
-                        contentDescription = movie.title,
+                        contentDescription = movieDetail.title,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(240.dp),
                         contentScale = ContentScale.Crop
                     )
                 }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp)
-                        .verticalScroll(rememberScrollState())
+                Spacer(modifier = Modifier.height(16.dp))
+
+                movieDetail.title.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                movieDetail.tagline?.let {
+                    Text(
+                        text = "\"$it\"",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "Release: ${movieDetail.releaseDate}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        "Runtime: ${movieDetail.runtime} min",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        "${movieDetail.voteAverage} / 10",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Genres
+                if (movieDetail.genres.isNotEmpty()) {
+                    Text(
+                        "Genres: ${movieDetail.genres.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                // Countries
+                if (movieDetail.countries.isNotEmpty()) {
+                    Text(
+                        "Countries: ${movieDetail.countries.joinToString(", ")}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                // Production Companies
+                if (movieDetail.productionCompanies.isNotEmpty()) {
+                    Text(
+                        "Production: ${
+                            movieDetail.productionCompanies.joinToString(
+                                ", "
+                            )
+                        }", style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Overview
+                Text("Synopsis", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    movieDetail.overview, style = MaterialTheme.typography.bodyMedium
                 )
-                {
-                    Spacer(modifier = Modifier.height(16.dp))
 
-                    movie.title.let {
-                        Text(
-                            text = it,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    movie.tagline?.let {
-                        Text(
-                            text = "\"$it\"",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "Release: ${movie.releaseDate}",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            "Runtime: ${movie.runtime} min",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            "${movie.voteAverage} / 10",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Genres
-                    if (movie.genres.isNotEmpty()) {
-                        Text(
-                            "Genres: ${movie.genres.joinToString(", ")}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-
-                    // Countries
-                    if (movie.countries.isNotEmpty()) {
-                        Text(
-                            "Countries: ${movie.countries.joinToString(", ")}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-
-                    // Production Companies
-                    if (movie.productionCompanies.isNotEmpty()) {
-                        Text(
-                            "Production: ${movie.productionCompanies.joinToString(", ")}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Overview
-                    Text("Synopsis", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(movie.overview, style = MaterialTheme.typography.bodyMedium)
-
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
 
-                    // Homepage Button
-                    movie.homepage?.let {
-                        if (it.contains("netflix")) {
-                            Button(
-                                onClick = {
-                                    // open URL if needed
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Black, contentColor = Color.Red
-                                )
-                            ) {
-                                Text(
-                                    "Netflix",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                            }
-                        } else {
-                            Button(
-                                onClick = {
-                                    // open URL if needed
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Text(
-                                    "Visit Homepage",
-                                    style = MaterialTheme.typography.labelLarge,
-                                )
-                            }
+                // Homepage Button
+                movieDetail.homepage?.let {
+                    if (it.contains("netflix")) {
+                        Button(
+                            onClick = {
+                                // open URL if needed
+                            }, colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Black, contentColor = Color.Red
+                            )
+                        ) {
+                            Text(
+                                "Netflix",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
                         }
-
+                    } else {
+                        Button(
+                            onClick = {
+                                // open URL if needed
+                            }, colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                "Visit Homepage",
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                        }
                     }
                 }
             }

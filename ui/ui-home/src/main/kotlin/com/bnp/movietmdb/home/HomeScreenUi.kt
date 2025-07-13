@@ -1,5 +1,6 @@
 package com.bnp.movietmdb.home
 
+import android.R.attr.duration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -23,6 +24,7 @@ import com.bnp.movietmdb.common.theme.ThemeViewModel
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import com.bnp.movietmdb.common.R
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +33,27 @@ fun HomeScreenUi(
     viewModel: HomeViewModel = hiltViewModel(),
     themeViewModel: ThemeViewModel,
 
-) {
+    ) {
     val uiState by viewModel.uiState.collectAsState()
     val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = message,
+                    actionLabel = "Dismiss",
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.resetError()
+            }
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -45,7 +63,7 @@ fun HomeScreenUi(
                     )
                 },
                 actions = {
-                    IconButton(onClick = {themeViewModel.toggleTheme()}) {
+                    IconButton(onClick = { themeViewModel.toggleTheme() }) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
                             contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode"
@@ -78,62 +96,48 @@ private fun MovieListContent(
     onMovieClick: (Movie) -> Unit,
     padding: PaddingValues
 ) {
-    when {
-        uiState.movies.isEmpty() && uiState.isLoading -> {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    val state = rememberPullToRefreshState()
+
+    PullToRefreshBox(
+        isRefreshing = uiState.isRefreshing,
+        onRefresh = onRefresh,
+        state = state,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+    ) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(uiState.movies) { movie ->
+                MovieItem(movie, onClick = { onMovieClick(movie) })
             }
-        }
 
-        else -> {
-            val state = rememberPullToRefreshState()
-
-            PullToRefreshBox(
-                isRefreshing = uiState.isRefreshing,
-                onRefresh = onRefresh,
-                state = state,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.movies) { movie ->
-                        MovieItem(movie, onClick = { onMovieClick(movie) })
-                    }
-
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        if (uiState.isLoading) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-
-                    if (!uiState.isLoading && uiState.canLoadMore) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            LaunchedEffect(Unit) {
-                                onLoadMore()
-                            }
-                        }
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                if (uiState.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
                     }
                 }
             }
+
+            if (!uiState.isLoading && uiState.canLoadMore) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    LaunchedEffect(Unit) {
+                        onLoadMore()
+                    }
+                }
+            }
+
         }
     }
 }
