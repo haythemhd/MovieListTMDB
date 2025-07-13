@@ -20,6 +20,9 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bnp.movietmdb.common.theme.ThemeViewModel
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
+import com.bnp.movietmdb.common.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +38,12 @@ fun HomeScreenUi(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Popular Movies") },
+                title = {
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                        color = colorResource(id = R.color.brand_secondary)
+                    )
+                },
                 actions = {
                     IconButton(onClick = {themeViewModel.toggleTheme()}) {
                         Icon(
@@ -43,7 +51,10 @@ fun HomeScreenUi(
                             contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = colorResource(id = R.color.brand_primary)
+                )
             )
         }) { padding ->
         MovieListContent(

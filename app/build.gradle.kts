@@ -40,6 +40,18 @@ android {
     buildFeatures {
         compose = true
     }
+
+    flavorDimensions += "brand"
+    productFlavors {
+        create("pathe") {
+            dimension = "brand"
+            applicationIdSuffix = ".pathe"
+        }
+        create("ugc") {
+            dimension = "brand"
+            applicationIdSuffix = ".ugc"
+        }
+    }
 }
 
 dependencies {
