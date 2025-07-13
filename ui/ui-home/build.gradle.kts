@@ -54,6 +54,10 @@ dependencies {
 
     // Domain module dependency
     implementation(project(":domain"))
+    implementation(project(":common"))
+    implementation(libs.androidx.material.icons.extended)
+
+    implementation(libs.material)
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

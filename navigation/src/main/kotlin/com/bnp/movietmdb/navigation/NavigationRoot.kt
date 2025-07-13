@@ -9,6 +9,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
+import com.bnp.movietmdb.common.theme.ThemeViewModel
 import com.bnp.movietmdb.detail.DetailScreenUi
 import com.bnp.movietmdb.home.HomeScreenUi
 import kotlinx.serialization.Serializable
@@ -21,7 +22,8 @@ data class DetailScreen(val id: Int) : NavKey
 
 @Composable
 fun NavigationRoot(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    themeViewModel: ThemeViewModel
 ) {
     val backStack = rememberNavBackStack(HomeScreen)
     NavDisplay(
@@ -43,7 +45,8 @@ fun NavigationRoot(
                         HomeScreenUi(
                             onNavigateToMovieDetail = { id ->
                                 backStack.add(DetailScreen(id = id))
-                            }
+                            },
+                            themeViewModel = themeViewModel
                         )
                     }
                 }

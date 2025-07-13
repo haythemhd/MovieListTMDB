@@ -52,8 +52,8 @@ dependencies {
     // coil
     implementation(libs.coil.compose)
 
-    // Domain module dependency
     implementation(project(":domain"))
+    implementation(project(":common"))
 
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)

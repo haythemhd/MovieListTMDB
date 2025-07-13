@@ -60,6 +60,7 @@ dependencies {
 
     implementation(project(":navigation"))
     implementation(project(":data"))
+    implementation(project(":common"))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

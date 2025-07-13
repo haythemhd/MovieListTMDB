@@ -43,8 +43,9 @@ dependencies {
     implementation(libs.androidx.compose.material3.windowsizeclass)
     implementation(libs.androidx.lifecycle.viewmodel.nav3)
     implementation(libs.androidx.material3.adaptive)
-    implementation(project(":ui:ui-home"))
 
+    implementation(project(":common"))
+    implementation(project(":ui:ui-home"))
     implementation(project(":ui:ui-detail"))
 
     testImplementation(libs.junit)

@@ -12,20 +12,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.rememberAsyncImagePainter
 import com.bnp.movietmdb.domain.model.Movie
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.bnp.movietmdb.common.theme.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenUi(
-    onNavigateToMovieDetail: (id: Int) -> Unit, viewModel: HomeViewModel = hiltViewModel()
+    onNavigateToMovieDetail: (id: Int) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel,
+
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isDarkMode by themeViewModel.isDarkMode.collectAsState()
+
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Popular Movies") })
+            TopAppBar(
+                title = { Text("Popular Movies") },
+                actions = {
+                    IconButton(onClick = {themeViewModel.toggleTheme()}) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode"
+                        )
+                    }
+                }
+            )
         }) { padding ->
         MovieListContent(
             uiState = uiState,
