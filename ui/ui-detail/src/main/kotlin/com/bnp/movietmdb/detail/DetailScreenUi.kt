@@ -28,6 +28,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,18 +39,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.bnp.movietmdb.common.R
 import com.bnp.movietmdb.domain.model.MovieDetail
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreenUi(
-    movieId: Int,
-    onBackClick: () -> Unit,
-    viewModel: DetailViewModel = hiltViewModel()
+    movieId: Int, onBackClick: () -> Unit, viewModel: DetailViewModel = hiltViewModel()
 ) {
     LaunchedEffect(movieId) {
         viewModel.loadMovieDetail(movieId)
@@ -72,7 +74,8 @@ fun DetailScreenUi(
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
-        TopAppBar(navigationIcon = {
+        TopAppBar(
+            navigationIcon = {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
@@ -81,7 +84,12 @@ fun DetailScreenUi(
                     .clickable {
                         onBackClick.invoke()
                     })
-        }, title = { Text(text = uiState.movieDetail?.title ?: "") })
+        },
+            title = { Text(text = uiState.movieDetail?.title ?: "") },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = colorResource(id = R.color.brand_primary)
+            )
+        )
     }) { padding ->
 
         MovieDetailContent(
@@ -108,8 +116,7 @@ fun MovieDetailContent(
     ) {
         if (isLoading) {
             Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
             }
@@ -192,7 +199,7 @@ fun MovieDetailContent(
                 }
 
                 // Production Companies
-                if (movieDetail.productionCompanies?.isNotEmpty() == true ) {
+                if (movieDetail.productionCompanies?.isNotEmpty() == true) {
                     Text(
                         "Production: ${
                             movieDetail.productionCompanies!!.joinToString(
@@ -248,4 +255,28 @@ fun MovieDetailContent(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MovieDetailContentPreview() {
+    val movieDetail = MovieDetail(
+        id = 1,
+        title = "Inception",
+        posterUrl = "https://image.tmdb.org/t/p/w500/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
+        overview = "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: \"inception\", the implantation of another person's idea into a target's subconscious.",
+        releaseDate = "2010-07-15",
+        voteAverage = 8.3,
+        runtime = 148,
+        tagline = "Your mind is the scene of the crime.",
+        homepage = "https://www.warnerbros.com/movies/inception/",
+        genres = listOf("Action", "Science Fiction", "Adventure"),
+        countries = listOf("United States of America", "United Kingdom"),
+        productionCompanies = listOf("Legendary Pictures", "Syncopy", "Warner Bros. Pictures")
+    )
+    MovieDetailContent(
+        modifier = Modifier,
+        movieDetail = movieDetail,
+        isLoading = false
+    )
 }
