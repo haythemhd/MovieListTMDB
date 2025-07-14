@@ -7,6 +7,7 @@ import com.bnp.movietmdb.domain.usecase.GetMovieDetailUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,21 +20,24 @@ class DetailViewModel @Inject constructor(
     val uiState: StateFlow<DetailUiState> = _uiState
     fun loadMovieDetail(id: Int) {
         viewModelScope.launch {
-            _uiState.update { DetailUiState(isLoading = true) }
-            try {
-                val movieDetail = getMovieDetailUseCase(id)
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        movieDetail = movieDetail, isLoading = false, errorMessage = null
-                    )
+            getMovieDetailUseCase(id)
+                .catch {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            errorMessage = it.message ?: "An error occurred"
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        isLoading = false, errorMessage = e.message ?: "An error occurred"
-                    )
+                .collect { movieDetail ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            movieDetail = movieDetail,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
                 }
-            }
         }
     }
 

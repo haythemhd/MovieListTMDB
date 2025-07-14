@@ -5,7 +5,9 @@ Built with **Jetpack Compose**, **MVVM**, and other modern Android tools, it sho
 
 ## 📸 Screenshots
 
-> _Screenshots coming soon..._
+| Home | Detail |
+|:---:|:---:|
+| ![Home](screens/screen1.png) | ![Detail](screens/screen2.png) 
 
 ## 🚀 Features
 
@@ -63,19 +65,24 @@ Just switch brand resources (colors, logos, strings) via flavor or build config.
  ````
 📦 MovieListTMDB
 ├── 📁 app                     
+├── 📁 common
+│   ├── 📁 di
+│   ├── 📁 utils
+│   └── 📁 theme
 ├── 📁 core
 │   ├── 📁 common               
 │   ├── 📁 ui                   
-│   └── 📁 designsystem        
+│   └── 📁 designsystem          
 ├── 📁 data
-│   ├── 📁 remote               
-│   ├── 📁 local                
+│   ├── 📁 db 
+    ├── 📁 di           
+│   ├── 📁 remote                
 │   └── 📁 repository           
 ├── 📁 domain
-│   ├── 📁 model                
+│   ├── 📁 model
+    ├── 📁 repository                
 │   └── 📁 usecase              
-├── 📁 feature
-│   ├── 📁 splash              
+├── 📁 ui
 │   ├── 📁 home                 
 │   └── 📁 detail               
 └── 📁 navigation               

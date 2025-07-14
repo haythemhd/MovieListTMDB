@@ -10,26 +10,41 @@ import com.bnp.movietmdb.domain.model.Movie
 import com.bnp.movietmdb.domain.model.MovieDetail
 import com.bnp.movietmdb.domain.repository.MovieRepository
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class MovieRepositoryImpl @Inject constructor(
-    private val api: TmdbService, private val movieDao: MovieDao
+    private val api: TmdbService,
+    private val movieDao: MovieDao
 ) : MovieRepository {
 
-    override suspend fun getPopularMovies(page: Int): List<Movie> {
+    override fun getPopularMovies(page: Int): Flow<List<Movie>> = flow {
         val response = api.getPopularMovies(page = page, apiKey = BuildConfig.TMDB_API_KEY)
         val moviesFromDB = movieDao.getAllMovies().map { it.toDomain() }
-        return response.results.map { it.toDomain() }.map { movie ->
+        emit(response.results.map { it.toDomain() }.map { movie ->
             movie.copy(isSeen = moviesFromDB.any { it.id == movie.id })
+        })
+    }
+
+    override fun getMovieDetail(id: Int): Flow<MovieDetail> = flow {
+        try {
+            val movieDetail = api.getMovieDetail(id, BuildConfig.TMDB_API_KEY)
+            movieDao.insertMovie(movieDetail.toDomain().toEntity())
+            emit(movieDetail.toDomain())
+        } catch (e: Exception) {
+            val local = movieDao.getMovieById(id)?.toDomain()
+            if (local != null) {
+                emit(local)
+            } else {
+                throw e
+            }
         }
     }
 
-    override suspend fun getMovieDetail(id: Int): MovieDetail {
-        val movieDetail = api.getMovieDetail(id, BuildConfig.TMDB_API_KEY)
-        movieDao.insertMovie(movieDetail.toDomain().toEntity())
-        return movieDetail.toDomain()
+    override fun getMovieDetailFromDB(id: Int): Flow<MovieDetail?> = flow {
+        emit(
+            movieDao.getMovieById(id)?.toDomain()
+        )
     }
 
-    override suspend fun getMovieDetailFromDB(id: Int): MovieDetail? {
-        return movieDao.getMovieById(id)?.toDomain()
-    }
 }

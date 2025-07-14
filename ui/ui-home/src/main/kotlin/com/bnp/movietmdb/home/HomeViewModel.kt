@@ -7,6 +7,7 @@ import com.bnp.movietmdb.domain.usecase.GetPopularMoviesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,10 +16,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val getPopularMoviesUseCase: GetPopularMoviesUseCase
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState
-
     init {
         loadMovies()
     }
@@ -26,40 +25,53 @@ class HomeViewModel @Inject constructor(
         if (_uiState.value.isLoading || !_uiState.value.canLoadMore) return
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val movies = getPopularMoviesUseCase(_uiState.value.currentPage)
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        movies = if (currentState.currentPage == 1) movies else currentState.movies + movies,
-                        currentPage = currentState.currentPage + 1,
-                        isLoading = false,
-                        canLoadMore = movies.isNotEmpty()
-                    )
+            getPopularMoviesUseCase(_uiState.value.currentPage)
+                .catch {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            errorMessage = it.message ?: "An error occurred"
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
-            }
+                .collect { movies ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            movies = if (currentState.currentPage == 1) movies else currentState.movies + movies,
+                            currentPage = currentState.currentPage + 1,
+                            isLoading = false,
+                            canLoadMore = movies.isNotEmpty(),
+                            errorMessage = null
+                        )
+                    }
+                }
         }
     }
 
     fun onPullToRefresh() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isRefreshing = true, currentPage = 1) }
-            try {
-                val movies = getPopularMoviesUseCase(1)
-                _uiState.update {
-                    it.copy(
-                        movies = movies,
-                        currentPage = 2,
-                        isRefreshing = false,
-                        isLoading = false,
-                        canLoadMore = movies.isNotEmpty()
-                    )
+            _uiState.update { it.copy(isRefreshing = true, isLoading = true) }
+            getPopularMoviesUseCase(1)
+                .catch {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            isLoading = false,
+                            errorMessage = it.message ?: "An error occurred"
+                        )
+                    }
                 }
-            } catch (e: Exception) {
-                _uiState.update { it.copy(isRefreshing = false, isLoading = false, errorMessage = e.message) }
-            }
+                .collect { movies ->
+                    _uiState.update {
+                        it.copy(
+                            movies = movies,
+                            currentPage = 2,
+                            isRefreshing = false,
+                            isLoading = false,
+                            canLoadMore = movies.isNotEmpty(),
+                            errorMessage = null
+                        )
+                    }
+                }
         }
     }
 
