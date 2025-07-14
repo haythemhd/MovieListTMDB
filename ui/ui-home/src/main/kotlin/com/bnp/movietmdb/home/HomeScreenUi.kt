@@ -1,7 +1,7 @@
 package com.bnp.movietmdb.home
 
-import android.R.attr.duration
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
@@ -19,6 +19,7 @@ import com.bnp.movietmdb.domain.model.Movie
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.ui.draw.alpha
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bnp.movietmdb.common.theme.ThemeViewModel
 import androidx.compose.ui.res.colorResource
@@ -80,6 +81,7 @@ fun HomeScreenUi(
             onLoadMore = viewModel::loadMovies,
             onRefresh = viewModel::onPullToRefresh,
             onMovieClick = { movie ->
+                viewModel.onMovieClick(movie.id)
                 onNavigateToMovieDetail(movie.id)
             },
             padding = padding
@@ -129,7 +131,6 @@ private fun MovieListContent(
                     }
                 }
             }
-
             if (!uiState.isLoading && uiState.canLoadMore) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     LaunchedEffect(Unit) {
@@ -137,7 +138,6 @@ private fun MovieListContent(
                     }
                 }
             }
-
         }
     }
 }
@@ -152,11 +152,18 @@ fun MovieItem(
             .width(100.dp)
             .padding(4.dp)
             .clickable(onClick = onClick)
+
     ) {
         Image(
             painter = rememberAsyncImagePainter(movie.posterUrl),
             contentDescription = movie.title,
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier
+                .size(120.dp)
+                .alpha(
+                    if (movie.isSeen) 0.5f
+                    else 1f
+
+                ),
             contentScale = ContentScale.Crop
         )
         Text(

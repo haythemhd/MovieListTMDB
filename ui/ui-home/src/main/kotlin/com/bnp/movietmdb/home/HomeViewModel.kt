@@ -63,6 +63,21 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun onMovieClick(movieId: Int) {
+        // Mark the movie as seen
+        _uiState.update { currentState ->
+            currentState.copy(
+                movies = currentState.movies.map { movie ->
+                    if (movie.id == movieId) {
+                        movie.copy(isSeen = true)
+                    } else {
+                        movie
+                    }
+                }
+            )
+        }
+    }
+
     fun resetError() {
         _uiState.update { it.copy(errorMessage = null) }
     }

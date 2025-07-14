@@ -176,26 +176,26 @@ fun MovieDetailContent(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Genres
-                if (movieDetail.genres.isNotEmpty()) {
+                if (movieDetail.genres?.isNotEmpty() == true) {
                     Text(
-                        "Genres: ${movieDetail.genres.joinToString(", ")}",
+                        "Genres: ${movieDetail.genres!!.joinToString(", ")}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
 
                 // Countries
-                if (movieDetail.countries.isNotEmpty()) {
+                if (!movieDetail.countries.isNullOrEmpty()) {
                     Text(
-                        "Countries: ${movieDetail.countries.joinToString(", ")}",
+                        "Countries: ${movieDetail.countries!!.joinToString(", ")}",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
 
                 // Production Companies
-                if (movieDetail.productionCompanies.isNotEmpty()) {
+                if (movieDetail.productionCompanies?.isNotEmpty() == true ) {
                     Text(
                         "Production: ${
-                            movieDetail.productionCompanies.joinToString(
+                            movieDetail.productionCompanies!!.joinToString(
                                 ", "
                             )
                         }", style = MaterialTheme.typography.bodySmall

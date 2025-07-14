@@ -10,7 +10,7 @@ data class MovieDetail(
     val runtime: Int,
     val tagline: String?,
     val homepage: String?,
-    val genres: List<String>,
-    val countries: List<String>,
-    val productionCompanies: List<String>
+    val genres: List<String>?,
+    val countries: List<String>?,
+    val productionCompanies: List<String>?
 )

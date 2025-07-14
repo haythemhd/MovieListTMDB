@@ -7,4 +7,8 @@ interface MovieRepository {
     suspend fun getPopularMovies(age: Int): List<Movie>
     suspend fun getMovieDetail(id: Int): MovieDetail
 
+    suspend fun getMovieDetailFromDB(id: Int): MovieDetail?
+
+    suspend fun getAllMoviesFromDB(): List<MovieDetail>
+
 }

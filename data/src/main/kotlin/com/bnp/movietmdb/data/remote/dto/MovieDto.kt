@@ -1,7 +1,6 @@
 package com.bnp.movietmdb.data.remote.dto
 
 import com.bnp.movietmdb.domain.model.Movie
-import com.google.gson.annotations.SerializedName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
