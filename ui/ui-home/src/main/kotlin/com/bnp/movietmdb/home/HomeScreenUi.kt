@@ -66,7 +66,7 @@ fun HomeScreenUi(
                     IconButton(onClick = { themeViewModel.toggleTheme() }) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
-                            contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode"
+                            contentDescription = if (isDarkMode) "Switch to Light Mode" else "Switch to Dark Mode",
                         )
                     }
                 },

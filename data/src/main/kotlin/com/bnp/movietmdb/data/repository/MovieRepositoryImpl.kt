@@ -1,11 +1,10 @@
 package com.bnp.movietmdb.data.repository
 
-import com.bnp.movietmdb.data.BuildConfig
 import com.bnp.movietmdb.data.db.MovieDao
-import com.bnp.movietmdb.data.db.toEntity
-import com.bnp.movietmdb.data.db.toDomain
+import com.bnp.movietmdb.data.db.mapper.toDomain
+import com.bnp.movietmdb.data.db.mapper.toEntity
 import com.bnp.movietmdb.data.remote.TmdbService
-import com.bnp.movietmdb.data.remote.dto.toDomain
+import com.bnp.movietmdb.data.remote.mapper.toDomain
 import com.bnp.movietmdb.domain.model.Movie
 import com.bnp.movietmdb.domain.model.MovieDetail
 import com.bnp.movietmdb.domain.repository.MovieRepository
@@ -19,7 +18,7 @@ class MovieRepositoryImpl @Inject constructor(
 ) : MovieRepository {
 
     override fun getPopularMovies(page: Int): Flow<List<Movie>> = flow {
-        val response = api.getPopularMovies(page = page, apiKey = BuildConfig.TMDB_API_KEY)
+        val response = api.getPopularMovies(page = page)
         val moviesFromDB = movieDao.getAllMovies().map { it.toDomain() }
         emit(response.results.map { it.toDomain() }.map { movie ->
             movie.copy(isSeen = moviesFromDB.any { it.id == movie.id })
@@ -28,7 +27,7 @@ class MovieRepositoryImpl @Inject constructor(
 
     override fun getMovieDetail(id: Int): Flow<MovieDetail> = flow {
         try {
-            val movieDetail = api.getMovieDetail(id, BuildConfig.TMDB_API_KEY)
+            val movieDetail = api.getMovieDetail(id)
             movieDao.insertMovie(movieDetail.toDomain().toEntity())
             emit(movieDetail.toDomain())
         } catch (e: Exception) {

@@ -11,13 +11,11 @@ interface TmdbService {
     @GET("movie/popular")
     suspend fun getPopularMovies(
         @Query("page") page: Int = 1,
-        @Query("api_key") apiKey: String
     ): PopularMoviesResponse
 
     @GET("movie/{movie_id}")
     suspend fun getMovieDetail(
         @Path("movie_id") movieId: Int,
-        @Query("api_key") apiKey: String
     ): MovieDetailDto
 
 }

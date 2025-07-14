@@ -5,9 +5,18 @@ Built with **Jetpack Compose**, **MVVM**, and other modern Android tools, it sho
 
 ## 📸 Screenshots
 
-| Home | Detail |
-|:---:|:---:|
+###  📱 Format   WIDTH_DP_MEDIUM_LOWER_BOUND < 600
+
+|             Home             |             Detail             |
+|:----------------------------:|:------------------------------:|
 | ![Home](screens/screen1.png) | ![Detail](screens/screen2.png) 
+
+###  📱 Format   WIDTH_DP_MEDIUM_LOWER_BOUND > 600
+
+|             Home             | Detail |
+|:----------------------------:|:---:|
+| ![Home](screens/screen3.png) | ![Detail](screens/screen4.png)
+
 
 ## 🚀 Features
 

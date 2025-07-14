@@ -24,6 +24,7 @@ class DetailViewModel @Inject constructor(
                 .catch {
                     _uiState.update { currentState ->
                         currentState.copy(
+                            movieDetail = null,
                             isLoading = false,
                             errorMessage = it.message ?: "An error occurred"
                         )

@@ -1,5 +1,6 @@
 package com.bnp.movietmdb.data.di
 
+import com.bnp.movietmdb.data.network.ApiKeyInterceptor
 import com.bnp.movietmdb.data.remote.TmdbService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -24,7 +25,9 @@ object NetworkModule {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
+        val apiKeyInterceptor = ApiKeyInterceptor()
         return OkHttpClient.Builder()
+            .addInterceptor(apiKeyInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }

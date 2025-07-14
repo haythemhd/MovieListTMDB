@@ -1,24 +1,7 @@
-package com.bnp.movietmdb.data.db
+package com.bnp.movietmdb.data.db.mapper
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.bnp.movietmdb.data.db.entity.MovieEntity
 import com.bnp.movietmdb.domain.model.MovieDetail
-
-@Entity(tableName = "movie")
-data class MovieEntity(
-    @PrimaryKey val id: Int,
-    val title: String?,
-    val posterUrl: String?,
-    val overview: String?,
-    val releaseDate: String?,
-    val voteAverage: Double?,
-    val runtime: Int?,
-    val tagline: String?,
-    val homepage: String?,
-    val genres: List<String>?,
-    val countries: List<String>?,
-    val productionCompanies: List<String>?
-)
 
 
 fun MovieDetail.toEntity(): MovieEntity = MovieEntity(

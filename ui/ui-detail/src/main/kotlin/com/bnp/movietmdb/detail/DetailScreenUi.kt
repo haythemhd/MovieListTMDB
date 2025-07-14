@@ -76,16 +76,22 @@ fun DetailScreenUi(
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }, topBar = {
         TopAppBar(
             navigationIcon = {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                modifier = Modifier
-                    .padding(horizontal = 12.dp)
-                    .clickable {
-                        onBackClick.invoke()
-                    })
-        },
-            title = { Text(text = uiState.movieDetail?.title ?: "") },
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = colorResource(id = R.color.brand_secondary),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                        .clickable {
+                            onBackClick.invoke()
+                        })
+            },
+            title = {
+                Text(
+                    text = uiState.movieDetail?.title ?: "",
+                    color = colorResource(id = R.color.brand_secondary)
+                )
+            },
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = colorResource(id = R.color.brand_primary)
             )
