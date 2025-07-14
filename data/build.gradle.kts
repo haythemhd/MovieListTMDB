@@ -18,13 +18,22 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
+        debug {
+            buildConfigField("String", "TMDB_API_KEY", "\"1ca7d04c4f37a915e21b57d4e04a6b20\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "TMDB_API_KEY", "\"1ca7d04c4f37a915e21b57d4e04a6b20\"")
+
         }
     }
     compileOptions {
@@ -51,7 +60,6 @@ dependencies {
 
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-
 
     implementation(project(":domain"))
 
