@@ -2,6 +2,7 @@ package com.bnp.movietmdb.domain.usecase
 
 import com.bnp.movietmdb.domain.model.MovieDetail
 import com.bnp.movietmdb.domain.repository.MovieRepository
+import com.bnp.movietmdb.domain.usecase.impl.GetMovieDetailUseCaseImpl
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -15,7 +16,7 @@ import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetMovieDetailUseCaseTest {
-    private val repository: MovieRepository = mockk()
+    private lateinit var repository: MovieRepository
     private lateinit var getMovieDetailUseCase: GetMovieDetailUseCase
 
     private val movieDetail = MovieDetail(
@@ -35,7 +36,8 @@ class GetMovieDetailUseCaseTest {
 
     @Before
     fun setUp() {
-        getMovieDetailUseCase = GetMovieDetailUseCase(repository)
+        repository = mockk()
+        getMovieDetailUseCase = GetMovieDetailUseCaseImpl(repository)
     }
 
     @Test

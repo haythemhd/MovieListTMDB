@@ -2,6 +2,7 @@ package com.bnp.movietmdb.domain.usecase
 
 import com.bnp.movietmdb.domain.model.Movie
 import com.bnp.movietmdb.domain.repository.MovieRepository
+import com.bnp.movietmdb.domain.usecase.impl.GetPopularMoviesUseCaseImpl
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -16,12 +17,13 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class GetPopularMoviesUseCaseTest {
 
-    private val repository: MovieRepository = mockk()
+    private lateinit var repository: MovieRepository
     private lateinit var getPopularMoviesUseCase: GetPopularMoviesUseCase
 
     @Before
     fun setup() {
-        getPopularMoviesUseCase = GetPopularMoviesUseCase(repository)
+        repository = mockk()
+        getPopularMoviesUseCase = GetPopularMoviesUseCaseImpl(repository)
     }
 
     @Test

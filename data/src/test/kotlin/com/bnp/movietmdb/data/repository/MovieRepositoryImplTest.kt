@@ -48,7 +48,7 @@ class MovieRepositoryImplTest {
             null,
             null,
         )
-        coEvery { api.getPopularMovies(any(), any()) } returns response
+        coEvery { api.getPopularMovies(any()) } returns response
 
         coEvery { dao.getAllMovies() } returns listOf(entity1)
 
@@ -75,7 +75,7 @@ class MovieRepositoryImplTest {
             null,
             null,
         )
-        coEvery { api.getMovieDetail(any(), any()) } throws IOException()
+        coEvery { api.getMovieDetail(any()) } throws IOException()
         coEvery { dao.getMovieById(1) } returns localEntity
 
         val result = repository.getMovieDetail(1).first()
